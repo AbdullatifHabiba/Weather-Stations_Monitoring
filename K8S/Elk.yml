@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elk
+  template:
+    metadata:
+      labels:
+        app: elk
+    spec:
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+          env:
+            - name: discovery.type
+              value: single-node
+            - name: node.name
+              value: elasticsearch
+            - name: cluster.name
+              value: elasticsearch-docker-cluster
+            - name: bootstrap.memory_lock
+              value: "true"
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+          ports:
+            - name: elasticsearch
+              containerPort: 9200
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+        - name: kibana
+          image: docker.elastic.co/kibana/kibana:7.14.0
+          env:
+            - name: ELASTICSEARCH_HOSTS
+              value: http://localhost:9200
+          ports:
+            - name: kibana
+              containerPort: 5601
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: ws-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elk
+spec:
+  type: NodePort
+  selector:
+    app: elk
+  ports:
+    - name: kibana
+      protocol: TCP
+      port: 5601
+      targetPort: 5601
+      nodePort: 30005  
+    - name: elasticsearch
+      protocol: TCP
+      port: 9200
+      targetPort: 9200
+      # nodePort: 30006
+
