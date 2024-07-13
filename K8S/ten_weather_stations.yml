@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: POD_NAME_PLACEHOLDER
+  name: weather-station-10
 spec:
   replicas: 1
   selector:
@@ -29,7 +29,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: POD_NAME_PLACEHOLDER
+  name: weather-station-10
 spec:
   selector:
     app: lbl-weather-station-producer
